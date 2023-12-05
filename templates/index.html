@@ -5,21 +5,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Books: list of routes</title>
-</head>
-
+  <title>Book Review Insights</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="../static/css/style.css"/>  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ </head>
 <body>
 
-<p>Available Routes:</p>
-<li>
-  <a href="#">/api/v1.0/books</a> <br/> This route returns a JSON list of books data <br/>
-</li>
-<li>
-  <a href="#">/api/v1.0/users</a> <br/> This route returns a JSON list of users data <br/>
-</li>
-<li>
-  <a href="#">/api/v1.0/reviews</a> <br/> This route returns a JSON list of book reviews by users <br/>
-</li>
-</body>
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 jumbotron text-center">
+      <h1>Book Review Insights Dashboard</h1>
+      <p> Some Instruction on what to do here on the page and why</p>
+    </div>
+  </div>
+ 
+  <div class="row">
+    <div class="col-md-12">
+      <div>
+        <canvas id="chartJsChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
 
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="../static/js/app.js"></script>
+
+</body>
 </html>
