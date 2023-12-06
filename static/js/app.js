@@ -4,7 +4,7 @@
 // let usersURL = /api/v1.0/users
 // let reviewsURL = /api/v1.0/reviews 
 
-function displayBubbleChart(){
+function displayBarChart(){
     // you may need to install Chart.js 'npm install chart.js' or may not
     let booksURL = '/api/v1.0/books';
     fetch(booksURL)
@@ -19,7 +19,7 @@ function displayBubbleChart(){
             data: {
               labels: authors_list,
               datasets: [{
-                label: 'ReviewScore',
+                label: 'Year',
                 data: Year_Publication,
                 borderWidth: 1
               }]
@@ -35,5 +35,5 @@ function displayBubbleChart(){
     })    
 }
 
-displayBubbleChart()
- 
+displayBarChart()
+

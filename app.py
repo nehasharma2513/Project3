@@ -12,6 +12,7 @@ db = client.books_db
 books_collection=db['books']
 reviews_collection=db['ratings']
 users_collection=db['users']
+merged_collection=db['merged']
 #################################################
 # Flask Setup
 #################################################
@@ -31,6 +32,12 @@ def get_books():
      books_data_cursor=books_collection.find({}, {'_id': 0})
      books_data = [book for book in books_data_cursor]
      return jsonify(books_data)
+
+@app.route("/api/v1.0/merged")
+def get_merged():
+    merged_data_cursor=merged_collection.find({}, {'_id': 0})
+    merged_data = [merged for merged in merged_data_cursor]
+    return jsonify(merged_data)
 
 @app.route("/api/v1.0/users")
 def get_users():
