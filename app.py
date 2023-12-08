@@ -35,9 +35,9 @@ def get_books():
 
 @app.route("/api/v1.0/merged")
 def get_merged():
-    merged_data_cursor=merged_collection.find({}, {'_id': 0})
-    merged_data = [merged for merged in merged_data_cursor]
-    return jsonify(merged_data)
+     b_data_cursor=merged_collection.find({}, {'_id': 0})
+     b_data= [book for book in b_data_cursor]
+     return jsonify(b_data)
 
 @app.route("/api/v1.0/users")
 def get_users():
