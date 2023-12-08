@@ -5,7 +5,7 @@
 // let reviewsURL = /api/v1.0/reviews 
 // let reviewsURL = /api/v1.0/merged
 
-const author='dfgdg'
+const author="Jack Canfield"
 
 function avgList(list){
     if (list.length>0){
@@ -65,7 +65,6 @@ function plotBubble(listOfObjects,maxReviewCounts){
     for (let i=0; i<=6;i++){
       xAxis.push(i*step);
     }
-    xAxis.push(maxReviewCounts);
   }
   else {
     for (let i=0; i<=maxReviewCounts;i++){
