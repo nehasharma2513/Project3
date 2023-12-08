@@ -5,7 +5,20 @@
 // let reviewsURL = /api/v1.0/reviews 
 // let reviewsURL = /api/v1.0/merged
 
-const author="Jack Canfield"
+const author= 'John Grisham'   //"Jack Canfield" (4 books, all Q4); 'John Grisham' -2 quarters,No reviews
+
+const doughnutChartColors = [
+  'rgb(211,211,211,0.8)',  //grey
+  'rgba(255, 0, 0, 0.8)', //red
+  'rgb(255, 229, 180, 0.8)',  // orange
+  'rgba(255, 255, 0, 0.8)',  // yellow
+  'rgba(0, 153, 76, 0.8)',    // green
+];
+
+const titleFont={
+  family: 'Arial, Helvetica, sans-serif',
+  size: 16
+};
 
 function avgList(list){
     if (list.length>0){
@@ -13,7 +26,8 @@ function avgList(list){
         for (let i of list){
             sum+=i
         }
-        return sum/list.length}
+        let avgL=sum/list.length
+        return avgL.toFixed(2)}
     else {return null}
 }
 
@@ -30,8 +44,8 @@ function generateGroupsText(listOfGroups){
     for (let i=0; i<listOfGroups.length; i++){
       if (listOfGroups[i]>0){
         if (listOfGroups[i]>1){
-        scoresText+=`score <b>${i+1}</b>: was given <b>${listOfGroups[i]}</b> times \n`;}
-        else {scoresText+=`score <b>${i+1}</b>: was given <b>${listOfGroups[i]}</b> time \n`;}
+        scoresText+=`  - score <b>${i+1}</b>: was given <b>${listOfGroups[i]}</b> times <br>`;}
+        else {scoresText+=`  - score <b>${i+1}</b>: was given <b>${listOfGroups[i]}</b> time <br>`;}
       }}
     return scoresText;  
     }
@@ -46,6 +60,58 @@ function normilizedSizeList(valuesList,maxS,minS){
   return valuesList.map(value=>(minAcceptable+(value-minS)*(maxAcceptable-minAcceptable)/(maxS-minS)));
 }
 
+function MinMax(arr) {  
+  return [Math.min(...arr),Math.max(...arr)];
+}
+
+function groupQuadrants(listOfObj,maxReviewCounts){
+  // create an object with number of author's book per each of defined category,
+  // which are quadrants: 
+  //Q1 - avgScore<5, ReviewsCount<maxReviewCounts/2
+  //Q2 - avgScore>=5, ReviewsCount<maxReviewCounts/2
+  //Q3 - avgScore<5, ReviewsCount>=maxReviewCounts/2
+  //Q4 - avgScore>=5, ReviewsCount>=maxReviewCounts/2
+  // as well as a category with No Reviews at all
+  let numberBooks=[];
+  let yearPubl=[[],[],[],[],[]];
+  const nameCategory = ['No Reviews', 'Q1 - Not Very Popular, Not Much Loved', 'Q2 - Not Very Popular, But Loved', 'Q3 - Popular, Not Much Loved', 'Q4 - Popular and Loved'];
+  for (let i=0; i<5; i++){
+    numberBooks[i]=0;
+  }
+  for (let obj of listOfObj){
+    if (obj.reviewsCount>0 && obj.avrScore<5 && obj.reviewsCount<maxReviewCounts/2){
+      numberBooks[1]+=1;
+      yearPubl[1].push(+obj.YearOfPublication);
+    }
+    else if (obj.reviewsCount>0 && obj.avrScore>=5 && obj.reviewsCount<maxReviewCounts/2){
+      numberBooks[2]+=1;
+      yearPubl[2].push(+obj.YearOfPublication);
+    }
+    else if (obj.reviewsCount>0 && obj.avrScore<5 && obj.reviewsCount>=maxReviewCounts/2){
+      numberBooks[3]+=1;
+      yearPubl[3].push(+obj.YearOfPublication);
+    }
+    else if (obj.reviewsCount>0 && obj.avrScore>=5 && obj.reviewsCount>=maxReviewCounts/2){
+      numberBooks[4]+=1;
+      yearPubl[4].push(+obj.YearOfPublication);
+    }
+    else if (obj.reviewsCount==0){
+      numberBooks[0]+=1;
+      yearPubl[0].push(+obj.YearOfPublication);
+    }
+  }
+  let minMaxY=[];
+  for (let i=0; i<yearPubl.length; i++){
+    minMaxY[i]=[];
+    minMaxY[i]=MinMax(yearPubl[i]);
+   }
+
+  return {
+    'values':numberBooks,
+    'categoryNames':nameCategory,
+    'publicationYears':minMaxY
+  }
+}
 
 function plotBubble(listOfObjects,maxReviewCounts){
   // plot the bubble chart
@@ -89,18 +155,15 @@ function plotBubble(listOfObjects,maxReviewCounts){
             color: 'black', 
             width: 1
           }},
-      text: listOfObjects.map(item=>`Book Title: <b>${item.bookTitle}</b><br> Year of Publication: <b>${item.YearOfPublication}</b> <br> Reviews proportion:<br> ${generateGroupsText(item.scoresCount)}<br>`),
+      text: listOfObjects.map(item=>` Book Title: <b>${item.bookTitle}</b><br> Year of Publication: <b>${item.YearOfPublication}</b> <br> Total <b>${item.reviewsCount}</b> Reviews:<br> ${generateGroupsText(item.scoresCount)}<br>`),
     };
 
     let data_bubble = [traceBubble];
     let backgroundOpacity=0.05
     let layout_bubble = {
       title: {
-          text: `<b> Popularity vs Lovability for ${author}</b> <br>sized by year of publication`,
-          font: {
-              family: 'Arial, Helvetica, sans-serif',
-              size: 16
-          }}, 
+          text: `<b> Quadrant Analysis of Reader Engagement for ${author}</b> <br>Reflects Lovability and Popularity, with Larger Markers for Recent Releases`,
+          font: titleFont}, 
       xaxis: {title: 'Reviews Count',
       zeroline: false, 
       tickvals: xAxis, 
@@ -188,9 +251,74 @@ function plotBubble(listOfObjects,maxReviewCounts){
       margin: { t: 55, r: 55, b: 55, l: 55 }
     };
   
-    Plotly.newPlot("bubble", data_bubble, layout_bubble, {responsive:true});
+    Plotly.newPlot("doughnutBubbleChart", data_bubble, layout_bubble, {responsive:true});
 }
 
+function plotDonutChart(proportionQ,author,minY,MaxY){
+  let pieDiv = document.getElementById("doughnutBubbleChart");
+  let values = proportionQ.values;
+  let names = proportionQ.categoryNames;
+  let years = proportionQ.publicationYears;
+  let valuesToPlot=[], namesToPlot=[], colorsToPlot=[], yearsToPlot=[];
+  for (let i=0; i<5; i++){
+    if (values[i]>0){
+      namesToPlot.push(names[i]);
+      valuesToPlot.push(values[i]);
+      colorsToPlot.push(doughnutChartColors[i]);
+      yearsToPlot.push(years[i]);
+    }
+  }
+  let texthint=[];
+  for (let i=0; i<yearsToPlot.length;i++){
+    texthint[i]=`Year of Publication: starting ${yearsToPlot[i][0]} with ${yearsToPlot[i][1]} latest`
+    if (yearsToPlot[i][0]==yearsToPlot[i][1]){
+      texthint[i]=`The only Year of Publication ${yearsToPlot[i][0]}`
+    }
+  }
+  let wholeBooks=0;
+  for (let i of values){
+    wholeBooks+=i;
+  }
+
+  let traceA = {
+    type: "pie",
+    values: valuesToPlot,
+    labels: namesToPlot,
+    hole: 0.5,
+    text: texthint,
+    hoverinfo: 'text+percent',
+    textinfo: 'none',
+    marker: {
+      colors: colorsToPlot}
+  };
+
+  let data = [traceA];
+
+  let titletext=`<b>Distribution by Reader Engagement for ${author}</b> <br>Years of Publication: ${minY}-${MaxY}`;
+  if (minY==MaxY){
+    titletext=`<b>Distribution by Reader Engagement for ${author}</b> <br>Year of Publication: ${minY}`
+  }
+
+  let layout = {
+    title: {
+      text:titletext,
+      font: titleFont},
+    annotations: [
+      {
+          font: {
+              size: 14,
+              family: 'Arial, Helvetica, sans-serif',
+              color: '(64,64,64,0.9)' 
+          },
+          showarrow: false,
+          text: `Total of<br><b>${wholeBooks}</b><br>books`,  
+          x: 0.5,
+          y: 0.5
+      }
+  ]
+  };
+  Plotly.newPlot(pieDiv, data, layout);
+}
 
 
 //Define the API endpoint
@@ -198,31 +326,8 @@ let merged = '/api/v1.0/merged';
 
 //Load the data
 d3.json(merged).then(function(data){ 
-  console.log(data);
-  // //Convert parsed data into a list of reviews groupped by author
-  // //Group data by author
-  // let authorReviews={};
-  // data.forEach(
-  //   item => {
-  //   let author = item['Book-Author'];
-  //   let reviews = item.Ratings.map(i=>i['Book-Rating'])
-  //   if (!(author in authorReviews)){
-  //       authorReviews[author]=[]
-  //   }
-  //   reviews.forEach(item=>{authorReviews[author].push(item)})
-  //   })
-  //  //generate a list of dictionaries of book reviews's related data per author
-  //   authorAvgRCount=[]
-  //   for (let i of Object.keys(authorReviews)){
-  //       tempDict={
-  //           'author':i,
-  //           'avrScore':avgList(authorReviews[i]),
-  //           'reviewsCount': authorReviews[i].length}
-  //       authorAvgRCount.push(tempDict)
-  //   }
-  // // Find the max reviews count for the whole data set
-  // let  maxReviewsCountAuthor=Math.max(...authorAvgRCount.map(item=>item.reviewsCount));
 
+  // Find the maximum number of reviews book recieved in the whole db
   let maxReviewCounts=Math.max(...data.map(item=>item.Ratings.length));
   // Generate a list of dictionaties for each book of the author, which has title, ISBN, publication year, average rating score and reviews count
   let authorBooks=data.filter(function(bookitem){return bookitem['Book-Author']==author})
@@ -239,10 +344,25 @@ d3.json(merged).then(function(data){
         'scoresCount':scoresCount
       } 
   })
+  // calculate number of books in each quadrant and those without reviews
+  let proportionQ=groupQuadrants(AuthorBookTPACListOfObjects,maxReviewCounts)
+  let minY=Math.min(...AuthorBookTPACListOfObjects.map(item=>item.YearOfPublication));
+  let maxY=Math.max(...AuthorBookTPACListOfObjects.map(item=>item.YearOfPublication));
+  // Listen for radio buttons
+  d3.selectAll("input[name='chart']").on("change", function() {
+    var selectedChart = this.value;
+    switch (selectedChart) {
+        case "doughnutChart":
+           plotDonutChart(proportionQ,author,minY,maxY)
+            break;
+        case "bubbleChart":
+            plotBubble(AuthorBookTPACListOfObjects, maxReviewCounts)
+            break;
+    }
+  });
+  //plot a pie chart initially
+  plotDonutChart(proportionQ,author,minY,maxY)
 
-  plotBubble(AuthorBookTPACListOfObjects, maxReviewCounts)
-
-  // to show a plot that shows there are books without ratings as well
 
 });
 

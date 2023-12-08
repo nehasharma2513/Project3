@@ -3,6 +3,10 @@ h1 {
     font-family: Arial, Helvetica, sans-serif
 }
 
-#chartJsChart {
-    width:600;
-}
+#doughnutBubbleChart {
+    margin: 0 auto;
+  }
+
+
+
+  
