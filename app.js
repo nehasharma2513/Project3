@@ -34,10 +34,11 @@ async function getAuthorsFromAPI() {
 
 // Function to update the author dropdown
 async function updateAuthorDropdownFromAPI() {
-  authorDropdown.innerHTML = ''; // Clear existing options
+  authorDropdown.innerHTML = ''; 
 
   try {
     const authors = await getAuthorsFromAPI();
+    authors.sort();
     authors.forEach(author => {
       const option = document.createElement('option');
       option.text = author;
