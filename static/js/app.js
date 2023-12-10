@@ -18,6 +18,7 @@ const titleFont={
   size: 16
 };
 
+//find an average for a list
 function avgList(list){
     if (list.length>0){
         let sum=0;
@@ -29,6 +30,7 @@ function avgList(list){
     else {return null}
 }
 
+//having an input list of rating scores for a book, group them by their values and find the count (lenght of a respective list)
 function groupByReviewScore(listScores){
   counts=[];
   for (let i=1;i<11; i++){
@@ -37,6 +39,7 @@ function groupByReviewScore(listScores){
   return counts
 }
 
+// Generate a text for a hint of bubble within Quadrant chart that represents a distribution between ratings
 function generateGroupsText(listOfGroups){
     let scoresText=``;
     for (let i=0; i<listOfGroups.length; i++){
@@ -53,13 +56,14 @@ function normilizedSizeList(valuesList,maxS,minS){
   // and then having max and min for the whole set convert any value within the range into [0;1]: projected01=(value-min)/(max-min)
   // then convert projected01 into value within range [minAcceptable;maxAcceptable]: projected01*(maxAcceptable-minAcceptable)+minAcceptable
   // https://math.stackexchange.com/questions/914823/shift-numbers-into-a-different-range
-  let minAcceptable=10;
-  let maxAcceptable=60;
+  let minAcceptable=5;
+  let maxAcceptable=74;
   return valuesList.map(value=>(minAcceptable+(value-minS)*(maxAcceptable-minAcceptable)/(maxS-minS)));
 }
 
-function MinMax(arr) {  
-  return [Math.min(...arr),Math.max(...arr)];
+// just looking for a Max and Min of a list
+function MinMax(listYears) {  
+  return [Math.min(...listYears),Math.max(...listYears)];
 }
 
 function groupQuadrants(listOfObj,maxReviewCounts){
@@ -111,13 +115,10 @@ function groupQuadrants(listOfObj,maxReviewCounts){
   }
 }
 
-function plotBubble(listOfObjects,maxReviewCounts,author){
+function plotBubble(listOfObjects,maxReviewCounts,author,overalMAxYear,overalMinYear){
   // plot the bubble chart
-  // size of the bubble will represent the year of book's publication
   let yearOfPublicationList=listOfObjects.map(item => item.YearOfPublication);
-  let maxYear=Math.max(...yearOfPublicationList);
-  let minYear=Math.min(...yearOfPublicationList);
-  let yearOfPublicationListNormilized=normilizedSizeList(yearOfPublicationList,maxYear,minYear);
+  let yearOfPublicationListNormilized=normilizedSizeList(yearOfPublicationList,overalMAxYear,overalMinYear);
   // x-axis will represent the count of reviews
   let reviewsCount=listOfObjects.map(item => item.reviewsCount);
   // y-axis will represent the average rating score
@@ -253,6 +254,7 @@ function plotBubble(listOfObjects,maxReviewCounts,author){
 }
 
 function plotDonutChart(proportionQ,author,minY,MaxY){
+  //plot the donut chart, using pie chart approach but with the hole defined
   let pieDiv = document.getElementById("doughnutBubbleChart");
   let values = proportionQ.values;
   let names = proportionQ.categoryNames;
@@ -297,6 +299,11 @@ function plotDonutChart(proportionQ,author,minY,MaxY){
     titletext=`<b>Distribution by Reader Engagement for ${author}</b> <br>Year of Publication: ${minY}`
   }
 
+  let holeText=`Total of<br><b>${wholeBooks}</b><br>books`
+  if (wholeBooks==1){
+    holeText=`Total of<br><b>${wholeBooks}</b><br>book`
+  }
+
   let layout = {
     title: {
       text:titletext,
@@ -309,7 +316,7 @@ function plotDonutChart(proportionQ,author,minY,MaxY){
               color: '(64,64,64,0.9)' 
           },
           showarrow: false,
-          text: `Total of<br><b>${wholeBooks}</b><br>books`,  
+          text: holeText,  
           x: 0.5,
           y: 0.5
       }
@@ -326,6 +333,13 @@ let merged = '/api/v1.0/merged';
 d3.json(merged).then(function(data){ 
   //Find the maximum number of reviews book recieved in the whole db
   let maxReviewCounts=Math.max(...data.map(item=>item.Ratings.length));
+  // find the max and min Year of Publications within the whole db, so that
+  // size of the bubble within quadrant represent the year of book's publication
+  let yearOfPublicationList=data.map(item => item['Year-Of-Publication']);
+  let maxOverallYear=Math.max(...yearOfPublicationList);
+  let minOverallYear=Math.min(...yearOfPublicationList);
+  console.log(maxOverallYear)
+  console.log(minOverallYear)
   // add a dropdown menu
   // find authors and sort them
   let authors_list=[...new Set(data.map(item => item['Book-Author']))];
@@ -347,14 +361,16 @@ d3.json(merged).then(function(data){
       .append('option')
       .attr('value', d=>d)
       .text(d=>d);
-  
+  //set very default value for a dropdown
   dropdownMenu.property('value', author);
 
+  //and listen if the item was changed here, within the author dropdown
   d3.selectAll("#selDataset").on("change", function(){
     author = this.value;
     optionChanged(author);
   });
 
+ // initialization of Quadrant part
   function plotDefaultWithinQuadrantPart(selectedAuthor){
     author=selectedAuthor;
     // Generate a list of dictionaties for each book of the author, which has title, ISBN, publication year, average rating score and reviews count
@@ -384,16 +400,16 @@ d3.json(merged).then(function(data){
       if (selectedChart == "doughnutChart") {
         plotDonutChart(proportionQ, author, minY, maxY);
       } else if (selectedChart == "bubbleChart") {
-        plotBubble(AuthorBookTPACListOfObjects, maxReviewCounts,author);
+        plotBubble(AuthorBookTPACListOfObjects, maxReviewCounts,author,maxOverallYear,minOverallYear);
       }
 
     });
 
     //plot a bubble chart initially
-    plotBubble(AuthorBookTPACListOfObjects, maxReviewCounts,author);
+    plotBubble(AuthorBookTPACListOfObjects, maxReviewCounts,author,maxOverallYear,minOverallYear);
 
   }
-
+ // render initial Quadrant plots
   plotDefaultWithinQuadrantPart(author)
 
      ////////////////////////////
@@ -408,7 +424,8 @@ d3.json(merged).then(function(data){
     //make 'bubbleChart' as default radio button selection 
     let radioButtonThatCorrespondsToBubble = d3.select("input[name='chart'][value='bubbleChart']");
     radioButtonThatCorrespondsToBubble.property("checked", true);
-
+    
+    // render quadrant plots after the change of dropdown item
     plotDefaultWithinQuadrantPart(new_author)
     
     ////////////////////////////
