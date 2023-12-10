@@ -5,8 +5,6 @@
 // let reviewsURL = /api/v1.0/reviews 
 // let reviewsURL = /api/v1.0/merged
 
-const author= 'John Grisham'   //"Jack Canfield" (4 books, all Q4); 'John Grisham' -2 quarters,No reviews
-
 const doughnutChartColors = [
   'rgb(211,211,211,0.8)',  //grey
   'rgba(255, 0, 0, 0.8)', //red
@@ -113,7 +111,7 @@ function groupQuadrants(listOfObj,maxReviewCounts){
   }
 }
 
-function plotBubble(listOfObjects,maxReviewCounts){
+function plotBubble(listOfObjects,maxReviewCounts,author){
   // plot the bubble chart
   // size of the bubble will represent the year of book's publication
   let yearOfPublicationList=listOfObjects.map(item => item.YearOfPublication);
@@ -326,42 +324,98 @@ let merged = '/api/v1.0/merged';
 
 //Load the data
 d3.json(merged).then(function(data){ 
-
-  // Find the maximum number of reviews book recieved in the whole db
+  //Find the maximum number of reviews book recieved in the whole db
   let maxReviewCounts=Math.max(...data.map(item=>item.Ratings.length));
-  // Generate a list of dictionaties for each book of the author, which has title, ISBN, publication year, average rating score and reviews count
-  let authorBooks=data.filter(function(bookitem){return bookitem['Book-Author']==author})
-  let AuthorBookTPACListOfObjects=authorBooks.map(
-    item => { 
-    let reviewsList = item.Ratings.map(i=>i['Book-Rating'])
-    let scoresCount=groupByReviewScore(reviewsList)
-    return {
-        'ISBN':item['ISBN'],
-        'bookTitle':item['Book-Title'],
-        'YearOfPublication': item['Year-Of-Publication'],
-        'avrScore': avgList(reviewsList),
-        'reviewsCount': reviewsList.length,
-        'scoresCount':scoresCount
-      } 
-  })
-  // calculate number of books in each quadrant and those without reviews
-  let proportionQ=groupQuadrants(AuthorBookTPACListOfObjects,maxReviewCounts)
-  let minY=Math.min(...AuthorBookTPACListOfObjects.map(item=>item.YearOfPublication));
-  let maxY=Math.max(...AuthorBookTPACListOfObjects.map(item=>item.YearOfPublication));
-  // Listen for radio buttons
-  d3.selectAll("input[name='chart']").on("change", function() {
-    var selectedChart = this.value;
-    switch (selectedChart) {
-        case "doughnutChart":
-           plotDonutChart(proportionQ,author,minY,maxY)
-            break;
-        case "bubbleChart":
-            plotBubble(AuthorBookTPACListOfObjects, maxReviewCounts)
-            break;
-    }
+  // add a dropdown menu
+  // find authors and sort them
+  let authors_list=[...new Set(data.map(item => item['Book-Author']))];
+  authors_list=authors_list.sort();
+
+  //select the author that has max review counts and set it as default one
+  let bookWithMaxReview=data.filter(book => book.Ratings.length == maxReviewCounts);
+  let author= bookWithMaxReview[0]['Book-Author'] // author that will be selected by default
+  // add a dropdown and populates with authors list
+  let dropdownMenu = d3.select("#selDataset");
+  // https://stackoverflow.com/questions/56307874/how-do-i-use-d3-to-i-populate-drop-down-options-from-json
+  let options = dropdownMenu.selectAll('option')
+      .data(authors_list)
+      //d3 sees we have less elements (0) than the data, so we are tasked to create
+      //these missing inside the `options.enter` pseudo selection.
+      //if we had some elements from before, they would be reused, and we could access their
+      //selection with just `options`
+      options.enter()
+      .append('option')
+      .attr('value', d=>d)
+      .text(d=>d);
+  
+  dropdownMenu.property('value', author);
+
+  d3.selectAll("#selDataset").on("change", function(){
+    author = this.value;
+    optionChanged(author);
   });
-  //plot a pie chart initially
-  plotDonutChart(proportionQ,author,minY,maxY)
+
+  function plotDefaultWithinQuadrantPart(selectedAuthor){
+    author=selectedAuthor;
+    // Generate a list of dictionaties for each book of the author, which has title, ISBN, publication year, average rating score and reviews count
+    let authorBooks=data.filter(function(bookitem){return bookitem['Book-Author']==author})
+    let AuthorBookTPACListOfObjects=authorBooks.map(
+      item => { 
+      let reviewsList = item.Ratings.map(i=>i['Book-Rating'])
+      let scoresCount=groupByReviewScore(reviewsList)
+      return {
+          'ISBN':item['ISBN'],
+          'bookTitle':item['Book-Title'],
+          'YearOfPublication': item['Year-Of-Publication'],
+          'avrScore': avgList(reviewsList),
+          'reviewsCount': reviewsList.length,
+          'scoresCount':scoresCount
+        } 
+    })
+
+    // calculate number of books in each quadrant and those without reviews
+    let proportionQ=groupQuadrants(AuthorBookTPACListOfObjects,maxReviewCounts)
+    let minY=Math.min(...AuthorBookTPACListOfObjects.map(item=>item.YearOfPublication));
+    let maxY=Math.max(...AuthorBookTPACListOfObjects.map(item=>item.YearOfPublication));
+
+       // Listen for radio button changes
+    d3.selectAll("input[name='chart']").on("change", function() {
+      var selectedChart = this.value;
+      if (selectedChart == "doughnutChart") {
+        plotDonutChart(proportionQ, author, minY, maxY);
+      } else if (selectedChart == "bubbleChart") {
+        plotBubble(AuthorBookTPACListOfObjects, maxReviewCounts,author);
+      }
+
+    });
+
+    //plot a bubble chart initially
+    plotBubble(AuthorBookTPACListOfObjects, maxReviewCounts,author);
+
+  }
+
+  plotDefaultWithinQuadrantPart(author)
+
+     ////////////////////////////
+    //PLEASE ADD HERE FUNCTIONS THAT PLOT INITIAL CHARTS and any data retrival you need you can get here from variable data
+    // \/\/\/\/\/\/
+    ///////////////
+
+      
+
+// This function is called when a dropdown menu item is selected
+  function optionChanged(new_author){
+    //make 'bubbleChart' as default radio button selection 
+    let radioButtonThatCorrespondsToBubble = d3.select("input[name='chart'][value='bubbleChart']");
+    radioButtonThatCorrespondsToBubble.property("checked", true);
+
+    plotDefaultWithinQuadrantPart(new_author)
+    
+    ////////////////////////////
+    //PLEASE ADD HERE FUNCTIONS THAT PLOT REST CHARTS AFTER DROPDOWN ITEM CHANGE and any data retrival you need you can get here from variable data
+    // \/\/\/\/\/\/
+    ///////////////
+  }
 
 
 });

@@ -20,17 +20,24 @@
       <p> Some Instruction on what to do here on the page and why</p>
     </div>
   </div>
-
-    <div id="radio-buttons">
-      <input type="radio" name="chart" value="doughnutChart" checked> High Level Distribution
-      <input type="radio" name="chart" value="bubbleChart"> Preview Quadrant Details
-  </div>
     <div class="row">
+      <div class="col-md-2">
+          <div class="names-bar">
+            <h5>Author:</h5>
+            <select id="selDataset"></select>
+          </div>
+      </div>
       <div class="col-md-12">
+        <!-- <p class="centeredText"><b>Review vs Average Rating Score patterns</b></p> -->
+        <div id="radio-buttons" class="centeredText">
+          <input type="radio" name="chart" value="bubbleChart" checked> Preview Quadrant Details
+          <input type="radio" name="chart" value="doughnutChart"> High Level Distribution
+       </div>
         <div id="doughnutBubbleChart"></div>
       </div>
     </div>
   </div>
+  
 </div>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
