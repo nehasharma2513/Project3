@@ -1,10 +1,12 @@
-
 // Available routes:
 // let booksURL = '/api/v1.0/books'
 // let usersURL = /api/v1.0/users
 // let reviewsURL = /api/v1.0/reviews 
 // let reviewsURL = /api/v1.0/merged
 
+//Part 1: Route Definitions and Constants
+
+// Define colors for the doughnut chart
 const doughnutChartColors = [
   'rgb(211,211,211,0.8)',  //grey
   'rgba(255, 0, 0, 0.8)', //red
@@ -13,12 +15,16 @@ const doughnutChartColors = [
   'rgba(0, 153, 76, 0.8)',    // green
 ];
 
+// Define font for chart title
 const titleFont={
   family: 'Arial, Helvetica, sans-serif',
   size: 16
 };
 
-//find an average for a list
+
+//Part 2: Utility Functions
+
+// Utility function to calculate the average of a list
 function avgList(list){
     if (list.length>0){
         let sum=0;
@@ -30,7 +36,7 @@ function avgList(list){
     else {return null}
 }
 
-//having an input list of rating scores for a book, group them by their values and find the count (lenght of a respective list)
+// Utility function to group review scores by their values
 function groupByReviewScore(listScores){
   counts=[];
   for (let i=1;i<11; i++){
@@ -39,7 +45,7 @@ function groupByReviewScore(listScores){
   return counts
 }
 
-// Generate a text for a hint of bubble within Quadrant chart that represents a distribution between ratings
+// Utility function to generate text for a hint in the bubble chart
 function generateGroupsText(listOfGroups){
     let scoresText=``;
     for (let i=0; i<listOfGroups.length; i++){
@@ -51,6 +57,7 @@ function generateGroupsText(listOfGroups){
     return scoresText;  
     }
 
+// Utility function to normalize the size of a list within a specified range
 function normilizedSizeList(valuesList,maxS,minS){
   // define acceptable range of values [minAcceptable;maxAcceptable]
   // and then having max and min for the whole set convert any value within the range into [0;1]: projected01=(value-min)/(max-min)
@@ -61,11 +68,12 @@ function normilizedSizeList(valuesList,maxS,minS){
   return valuesList.map(value=>(minAcceptable+(value-minS)*(maxAcceptable-minAcceptable)/(maxS-minS)));
 }
 
-// just looking for a Max and Min of a list
+// Utility function to find the minimum and maximum values in a list
 function MinMax(listYears) {  
   return [Math.min(...listYears),Math.max(...listYears)];
 }
 
+// Utility function to group books into quadrants based on reader engagement
 function groupQuadrants(listOfObj,maxReviewCounts){
   // create an object with number of author's book per each of defined category,
   // which are quadrants: 
@@ -115,6 +123,10 @@ function groupQuadrants(listOfObj,maxReviewCounts){
   }
 }
 
+
+//Part 3: Bubble Chart Plotting Function
+
+// Function to plot the bubble chart
 function plotBubble(listOfObjects,maxReviewCounts,author,overalMAxYear,overalMinYear){
   // plot the bubble chart
   let yearOfPublicationList=listOfObjects.map(item => item.YearOfPublication);
@@ -253,6 +265,10 @@ function plotBubble(listOfObjects,maxReviewCounts,author,overalMAxYear,overalMin
     Plotly.newPlot("doughnutBubbleChart", data_bubble, layout_bubble, {responsive:true});
 }
 
+
+//Part 4: Donut Chart Plotting Function
+
+// Function to plot the donut chart
 function plotDonutChart(proportionQ,author,minY,MaxY){
   //plot the donut chart, using pie chart approach but with the hole defined
   let pieDiv = document.getElementById("doughnutBubbleChart");
@@ -326,29 +342,78 @@ function plotDonutChart(proportionQ,author,minY,MaxY){
 }
 
 
+
+//Part 5: Data Loading and Initialization
 //Define the API endpoint
 let merged = '/api/v1.0/merged';
 
-//Load the data
+// Load the data using D3
 d3.json(merged).then(function(data){ 
-  //Find the maximum number of reviews book recieved in the whole db
-  let maxReviewCounts=Math.max(...data.map(item=>item.Ratings.length));
-  // find the max and min Year of Publications within the whole db, so that
-  // size of the bubble within quadrant represent the year of book's publication
-  let yearOfPublicationList=data.map(item => item['Year-Of-Publication']);
-  let maxOverallYear=Math.max(...yearOfPublicationList);
-  let minOverallYear=Math.min(...yearOfPublicationList);
+  // Extract relevant data and initialize default values
+  let maxReviewCounts = Math.max(...data.map(item => item.Ratings.length));
+  let yearOfPublicationList = data.map(item => item['Year-Of-Publication']);
+  let maxOverallYear = Math.max(...yearOfPublicationList);
+  let minOverallYear = Math.min(...yearOfPublicationList);
+  let authorsList = [...new Set(data.map(item => item['Book-Author']))].sort();
+  let author = data.filter(book => book.Ratings.length === maxReviewCounts)[0]['Book-Author'];
+
   console.log(maxOverallYear)
   console.log(minOverallYear)
-  // add a dropdown menu
-  // find authors and sort them
-  let authors_list=[...new Set(data.map(item => item['Book-Author']))];
-  authors_list=authors_list.sort();
+  
+// Map Initialization
+console.log("Initializing Leaflet map")
+  var myMap = L.map('map').setView([0, 0], 2);
+
+  // Add layer
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors'
+}).addTo(myMap);
+
+console.log("Leaflet map initialized");
+
+  // Loop through the data and add markers
+  data.forEach(record => {
+    // Extract latitude and longitude from your data
+    var lat = record['Ratings'][0]['User']['Geo-Data']['Lat'];
+    var long = record['Ratings'][0]['User']['Geo-Data']['Long'];
+
+    // Add a marker to the map
+    var marker = L.marker([lat, long]).addTo(myMap);
+
+    // Function to calculate marker size based on the number of reviews
+    function getSize(reviewsCount) {
+      return reviewsCount * 5;
+    }
+
+    // Function to calculate marker color based on the average rating
+    function getColor(rating) {
+      if (rating >= 8) {
+        return '#1a9850';
+      } else if (rating >= 6) {
+        return '#fee08b';
+      } else {
+        return '#d73027';
+      }
+    }
+
+    // Add a popup to the marker
+    marker.bindPopup(`
+      <b>Book Title:</b> ${record['Book-Title']}<br>
+      <b>Book Author:</b> ${record['Book-Author']}<br>
+      <b>Publisher:</b> ${record['Publisher']}<br>
+      <b>Year of Publication:</b> ${record['Year-Of-Publication']}<br>
+      <b>User Rating:</b> ${record['Ratings'][0]['Book-Rating']}<br>
+      <b>User Location:</b> ${record['Ratings'][0]['User']['Location']}
+    `);
+  });
+})
+.catch(error => console.error('Error loading data:', error));
 
   //select the author that has max review counts and set it as default one
   let bookWithMaxReview=data.filter(book => book.Ratings.length == maxReviewCounts);
   let author= bookWithMaxReview[0]['Book-Author'] // author that will be selected by default
-  // add a dropdown and populates with authors list
+
+  // Initialize the dropdown menu with authors and set default values
   let dropdownMenu = d3.select("#selDataset");
   // https://stackoverflow.com/questions/56307874/how-do-i-use-d3-to-i-populate-drop-down-options-from-json
   let options = dropdownMenu.selectAll('option')
@@ -364,7 +429,7 @@ d3.json(merged).then(function(data){
   //set very default value for a dropdown
   dropdownMenu.property('value', author);
 
-  //and listen if the item was changed here, within the author dropdown
+   // Listen for changes in the dropdown menu
   d3.selectAll("#selDataset").on("change", function(){
     author = this.value;
     optionChanged(author);
@@ -394,7 +459,9 @@ d3.json(merged).then(function(data){
     let minY=Math.min(...AuthorBookTPACListOfObjects.map(item=>item.YearOfPublication));
     let maxY=Math.max(...AuthorBookTPACListOfObjects.map(item=>item.YearOfPublication));
 
-       // Listen for radio button changes
+       //Part 6: Dropdown Change Event Function
+
+	// Listen for radio button changes
     d3.selectAll("input[name='chart']").on("change", function() {
       var selectedChart = this.value;
       if (selectedChart == "doughnutChart") {
@@ -412,30 +479,34 @@ d3.json(merged).then(function(data){
  // render initial Quadrant plots
   plotDefaultWithinQuadrantPart(author)
 
-     ////////////////////////////
-    //PLEASE ADD HERE FUNCTIONS THAT PLOT INITIAL CHARTS and any data retrival you need you can get here from variable data
-    // \/\/\/\/\/\/
-    ///////////////
+     // Function to update the Leaflet map based on the selected author
+function updateMap(author) {
+  // Clear existing markers on the map
+  clearMap();
 
+// Function to clear markers from the map
+function clearMap() {
+  myMap.eachLayer(layer => {
+    if (layer instanceof L.Marker) {
+      layer.remove();
+    }
+  });
+}
       
 
-// This function is called when a dropdown menu item is selected
+// Function called when a dropdown menu item is selected
   function optionChanged(new_author){
     //make 'bubbleChart' as default radio button selection 
     let radioButtonThatCorrespondsToBubble = d3.select("input[name='chart'][value='bubbleChart']");
     radioButtonThatCorrespondsToBubble.property("checked", true);
     
-    // render quadrant plots after the change of dropdown item
+    // Render quadrant plots after the change of dropdown item
     plotDefaultWithinQuadrantPart(new_author)
-    
-    ////////////////////////////
-    //PLEASE ADD HERE FUNCTIONS THAT PLOT REST CHARTS AFTER DROPDOWN ITEM CHANGE and any data retrival you need you can get here from variable data
-    // \/\/\/\/\/\/
-    ///////////////
+
   }
 
 
-});
+};
 
 
 
