@@ -12,18 +12,39 @@
  </head>
 <body>
 
+
 <div class="container">
-  <div class="row">
-    <div class="col-md-12 jumbotron text-center">
-      <h1>Book Review Insights Dashboard</h1>
-      <p> Some Instruction on what to do here on the page and why</p>
-    </div>
+  <div class="header">
+    <div class="row">
+      <div class="header_text">
+        <h1>Book Review Insights Dashboard</h1>
+        <p class="paragraph_class"> Some Instruction on what to do here on the page and why</p>
+      </div>
   </div>
+<<<<<<< Updated upstream
  
   <div class="row">
     <div class="col-md-12">
       <div>
         <canvas id="chartJsChart"></canvas>
+=======
+</div>
+
+    <div class="row">
+      <div class="col-md-2">
+          <div class="names-bar">
+            <h3>Author:</h3>
+            <select id="selDataset"></select>
+          </div>
+      </div>
+      <div class="col-md-12">
+        <!-- <p class="centeredText"><b>Review vs Average Rating Score patterns</b></p> -->
+        <div id="radio-buttons" class="centeredText">
+          <input type="radio" name="chart" value="bubbleChart" checked="checked" > Preview Quadrant Details
+          <input type="radio" name="chart" value="doughnutChart"> High Level Distribution
+       </div>
+        <div id="doughnutBubbleChart"></div>
+>>>>>>> Stashed changes
       </div>
     </div>
   </div>

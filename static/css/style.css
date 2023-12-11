@@ -1,8 +1,72 @@
+.header {
+    background-color: #F1F1F1;
+    text-align: center;
+    padding: 25px 50px 75px 100px;
+    background-color: #404040;
+    border: 1px solid black
+  }
+
+.paragraph_class
+{
+    color: white;
+  text-indent: 30px;
+}
 h1 {
-    font-weight: 200;
-    font-family: Arial, Helvetica, sans-serif
+    
+    font-size: 40px; 
+    font-weight: 600;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
+h3 {
+    color: white;
+    font-size: 30px; 
+    font-weight: 800;
+}
+
+body { 
+    background-color: #C0C0C0; 
+    max-width: 100%; 
+    overflow-x: hidden; 
+  } 
+
+<<<<<<< Updated upstream
 #chartJsChart {
     width:600;
 }
+=======
+#doughnutBubbleChart {
+    margin: 0 auto;
+    
+  }
+
+.custom-col-12 {
+    padding-top: 30px; 
+}
+
+.centeredText{
+    text-align: center;
+    font-weight: 600;
+    padding: 25px 20px 25px 10px; 
+}
+
+input[type="radio"]{
+    margin: 0 10px 0 20px;
+  }
+
+.names-bar
+{
+    font-weight: 600;
+    text-align: left;
+    padding: 25px 20px 20px 10px; 
+
+}
+
+
+.col-md-2
+{
+    font-weight: 600;
+}
+
+>>>>>>> Stashed changes
