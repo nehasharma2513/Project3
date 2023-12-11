@@ -18,6 +18,8 @@ const titleFont={
   size: 16
 };
 
+let ChartJsArea; // created for tracking of the chart already built using chart js
+
 //find an average for a list
 function avgList(list){
     if (list.length>0){
@@ -56,14 +58,26 @@ function normilizedSizeList(valuesList,maxS,minS){
   // and then having max and min for the whole set convert any value within the range into [0;1]: projected01=(value-min)/(max-min)
   // then convert projected01 into value within range [minAcceptable;maxAcceptable]: projected01*(maxAcceptable-minAcceptable)+minAcceptable
   // https://math.stackexchange.com/questions/914823/shift-numbers-into-a-different-range
-  let minAcceptable=5;
-  let maxAcceptable=74;
+  let minAcceptable=3;
+  let maxAcceptable=55;
   return valuesList.map(value=>(minAcceptable+(value-minS)*(maxAcceptable-minAcceptable)/(maxS-minS)));
+}
+
+function shortenString(stringContent, maxNumberOfCharecters) {
+  if (stringContent.length>maxNumberOfCharecters){
+    return stringContent.substring(0, maxNumberOfCharecters) + '...'
+  }
+  else return stringContent
 }
 
 // just looking for a Max and Min of a list
 function MinMax(listYears) {  
   return [Math.min(...listYears),Math.max(...listYears)];
+}
+
+function ChartJSTextToolTip(metric){
+if (metric =='avrScore'){return 'Average Rating Score'}
+else {return 'Total Reviews Count'}
 }
 
 function groupQuadrants(listOfObj,maxReviewCounts){
@@ -154,7 +168,7 @@ function plotBubble(listOfObjects,maxReviewCounts,author,overalMAxYear,overalMin
             color: 'black', 
             width: 1
           }},
-      text: listOfObjects.map(item=>` Book Title: <b>${item.bookTitle}</b><br> Year of Publication: <b>${item.YearOfPublication}</b> <br> Total <b>${item.reviewsCount}</b> Reviews:<br> ${generateGroupsText(item.scoresCount)}<br>`),
+      text: listOfObjects.map(item=>` <b>${shortenString(item.bookTitle,37)}</b><br> Year of Publication: <b>${item.YearOfPublication}</b> <br> Total <b>${item.reviewsCount}</b> Review(s):<br> ${generateGroupsText(item.scoresCount)}<br>`),
     };
 
     let data_bubble = [traceBubble];
@@ -325,6 +339,57 @@ function plotDonutChart(proportionQ,author,minY,MaxY){
   Plotly.newPlot(pieDiv, data, layout);
 }
 
+function plotChartJS (authorAvgRCount,metric) {
+
+  authorAvgRCount.sort((a, b) => {
+    return b[metric] - a[metric];
+});
+
+authorAvgRCount=authorAvgRCount.slice(0,15);
+
+  //destroy previously plotted chart if such was plotted
+  if (ChartJsArea) {
+    ChartJsArea.destroy();
+  }
+  
+  // plot a chart creating 
+  ChartJsArea = new Chart(
+    document.getElementById('chartJsChart'),
+    {
+      type: 'bar',
+      options: {
+        animation: false,
+        responsive: true,
+        title: {
+          display: true,
+          text: 'Top 10 Authors', 
+          fontSize: titleFont,
+        },
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltips: {
+            enabled: true,
+          },
+        }
+      },
+      data: {
+        labels: authorAvgRCount.map(item => item.author),
+        datasets: [
+          {
+            label: ChartJSTextToolTip(metric),
+            data: authorAvgRCount.map(item => item[metric]),
+            hoverBackgroundColor: 'rgba(37, 41, 88, 0.5)',
+            hoverBorderColor: 'rgba(37, 41, 88, 1)',
+          }
+        ]
+      }
+    }
+  );
+  }
+
 
 //Define the API endpoint
 let merged = '/api/v1.0/merged';
@@ -338,8 +403,7 @@ d3.json(merged).then(function(data){
   let yearOfPublicationList=data.map(item => item['Year-Of-Publication']);
   let maxOverallYear=Math.max(...yearOfPublicationList);
   let minOverallYear=Math.min(...yearOfPublicationList);
-  console.log(maxOverallYear)
-  console.log(minOverallYear)
+
   // add a dropdown menu
   // find authors and sort them
   let authors_list=[...new Set(data.map(item => item['Book-Author']))];
@@ -416,6 +480,44 @@ d3.json(merged).then(function(data){
     //PLEASE ADD HERE FUNCTIONS THAT PLOT INITIAL CHARTS and any data retrival you need you can get here from variable data
     // \/\/\/\/\/\/
     ///////////////
+  
+
+//// whole set of data 
+//Convert parsed data into a list of reviews groupped by author
+  //Group data by author
+  let authorReviews={};
+  data.forEach(
+    item => {
+    let author = item['Book-Author'];
+    let reviews = item.Ratings.map(i=>i['Book-Rating'])
+    if (!(author in authorReviews)){
+        authorReviews[author]=[]
+    }
+    reviews.forEach(item=>{authorReviews[author].push(item)})
+    })
+   //generate a list of dictionaries of book reviews's related data per author
+    authorAvgRCount=[]
+    for (let i of Object.keys(authorReviews)){
+        tempDict={
+            'author':i,
+            'avrScore':avgList(authorReviews[i]),
+            'reviewsCount': authorReviews[i].length}
+        authorAvgRCount.push(tempDict)
+    }
+    console.log(authorAvgRCount);
+  // Find the max reviews count for the whole data set
+//   let  maxReviewsCountAuthor=Math.max(...authorAvgRCount.map(item=>item.reviewsCount));
+
+// Listen for radio button changes
+d3.selectAll("input[name='barTypeChartJs']").on("change", function() {
+  let selectedMetric = this.value;
+  if (selectedMetric == "avgScore") {
+    plotChartJS (authorAvgRCount,"avrScore");
+  } else if (selectedMetric == "ReviewsCount") {
+    plotChartJS (authorAvgRCount,"reviewsCount");
+  }});
+
+  plotChartJS(authorAvgRCount,"avrScore");
 
       
 

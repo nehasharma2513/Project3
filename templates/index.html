@@ -21,6 +21,14 @@
     </div>
   </div>
     <div class="row">
+      <div>
+        <div id="radio-buttons" class="centeredText">
+          <input type="radio" name="barTypeChartJs"  value="avgScore" checked> Average Rating Score
+          <input type="radio" name="barTypeChartJs"  value="ReviewsCount">  Reviews Count
+       </div>
+       <div>
+        <canvas id="chartJsChart"></canvas>
+      </div>
       <div class="col-md-2">
           <div class="names-bar">
             <h5>Author:</h5>
@@ -28,7 +36,6 @@
           </div>
       </div>
       <div class="col-md-12">
-        <!-- <p class="centeredText"><b>Review vs Average Rating Score patterns</b></p> -->
         <div id="radio-buttons" class="centeredText">
           <input type="radio" name="chart" value="bubbleChart" checked> Preview Quadrant Details
           <input type="radio" name="chart" value="doughnutChart"> High Level Distribution

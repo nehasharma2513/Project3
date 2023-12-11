@@ -14,3 +14,7 @@ h1 {
 .centeredText{
     text-align: center;
 }
+
+#chartJsChart {
+    width:600;
+} 
