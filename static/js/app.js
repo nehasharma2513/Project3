@@ -532,12 +532,11 @@ d3.selectAll("input[name='barTypeChartJs']").on("change", function() {
 
   plotChartJS(authorAvgRCount,"avrScore");
 
-   ////////////////////////////
+    ////////////////////////////
     //PLEASE ADD HERE FUNCTIONS THAT PLOT INITIAL CHARTS and any data retrival you need you can get here from variable data
     // \/\/\/\/\/\/
     ///////////////
-
-      
+    
 
 // This function is called when a dropdown menu item is selected
   function optionChanged(new_author){
@@ -552,6 +551,8 @@ d3.selectAll("input[name='barTypeChartJs']").on("change", function() {
     //PLEASE ADD HERE FUNCTIONS THAT PLOT REST CHARTS AFTER DROPDOWN ITEM CHANGE and any data retrival you need you can get here from variable data
     // \/\/\/\/\/\/
     ///////////////
+
+
   }
 
 });
