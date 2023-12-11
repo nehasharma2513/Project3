@@ -374,9 +374,9 @@ console.log("Leaflet map initialized");
   // Loop through the data and add markers
   data.forEach(record => {
     // Extract latitude and longitude 
-    var lat = record['Ratings'][0]['User']['Geo-Data']['Lat'];
-    var long = record['Ratings'][0]['User']['Geo-Data']['Long'];
-
+    dataforauthor.map(item => {
+  let reviewsList = item.Ratings.map(review => review['Book-Rating']);
+	    
     // Add a marker to the map
     var marker = L.marker([lat, long]).addTo(myMap);
 
