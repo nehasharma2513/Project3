@@ -162,7 +162,8 @@ function plotBubble(listOfObjects,maxReviewCounts,author,overalMAxYear,overalMin
       y: avgRatingScore,
       mode: 'markers',
       marker: { 
-          color: '#1f77b4',
+          color: '#2986cc',
+          opacity: 1,
           size:  yearOfPublicationListNormilized,
           line: {
             color: 'black', 
@@ -172,7 +173,7 @@ function plotBubble(listOfObjects,maxReviewCounts,author,overalMAxYear,overalMin
     };
 
     let data_bubble = [traceBubble];
-    let backgroundOpacity=0.05
+    let backgroundOpacity=0.1
     let layout_bubble = {
       title: {
           text: `<b> Quadrant Analysis of Reader Engagement for ${author}</b> <br>Reflects Lovability and Popularity, with Larger Markers for Recent Releases`,
@@ -345,7 +346,7 @@ function plotChartJS (authorAvgRCount,metric) {
     return b[metric] - a[metric];
 });
 
-authorAvgRCount=authorAvgRCount.slice(0,15);
+  authorAvgRCount=authorAvgRCount.slice(0,10);
 
   //destroy previously plotted chart if such was plotted
   if (ChartJsArea) {
@@ -355,17 +356,32 @@ authorAvgRCount=authorAvgRCount.slice(0,15);
   // plot a chart creating 
   ChartJsArea = new Chart(
     document.getElementById('chartJsChart'),
-    {
-      type: 'bar',
+    {   
+      type: 'bar',   
       options: {
         animation: false,
+        indexAxis: 'y',
         responsive: true,
-        title: {
-          display: true,
-          text: 'Top 10 Authors', 
-          fontSize: titleFont,
-        },
         maintainAspectRatio: false,
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: ChartJSTextToolTip(metric),  
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Author', 
+            },
+            ticks: {
+              font: {
+                size: 9
+              }
+          }
+          }
+        },
         plugins: {
           legend: {
             display: false
@@ -373,6 +389,11 @@ authorAvgRCount=authorAvgRCount.slice(0,15);
           tooltips: {
             enabled: true,
           },
+          title: {
+            display: true,
+            text: 'Top 10 Authors by '+ ChartJSTextToolTip(metric),
+            font: titleFont
+          }
         }
       },
       data: {
@@ -381,8 +402,9 @@ authorAvgRCount=authorAvgRCount.slice(0,15);
           {
             label: ChartJSTextToolTip(metric),
             data: authorAvgRCount.map(item => item[metric]),
-            hoverBackgroundColor: 'rgba(37, 41, 88, 0.5)',
-            hoverBorderColor: 'rgba(37, 41, 88, 1)',
+            backgroundColor: '#2986cc',
+            hoverBackgroundColor: 'rgba(0,0,139,1)',
+            hoverBorderColor: 'rgba(0,0,139, 1)',
           }
         ]
       }
@@ -476,15 +498,9 @@ d3.json(merged).then(function(data){
  // render initial Quadrant plots
   plotDefaultWithinQuadrantPart(author)
 
-     ////////////////////////////
-    //PLEASE ADD HERE FUNCTIONS THAT PLOT INITIAL CHARTS and any data retrival you need you can get here from variable data
-    // \/\/\/\/\/\/
-    ///////////////
-  
-
-//// whole set of data 
-//Convert parsed data into a list of reviews groupped by author
-  //Group data by author
+  // for the whole set of data 
+  // Convert parsed data into a list of reviews groupped by author
+  // Group data by author
   let authorReviews={};
   data.forEach(
     item => {
@@ -504,9 +520,6 @@ d3.json(merged).then(function(data){
             'reviewsCount': authorReviews[i].length}
         authorAvgRCount.push(tempDict)
     }
-    console.log(authorAvgRCount);
-  // Find the max reviews count for the whole data set
-//   let  maxReviewsCountAuthor=Math.max(...authorAvgRCount.map(item=>item.reviewsCount));
 
 // Listen for radio button changes
 d3.selectAll("input[name='barTypeChartJs']").on("change", function() {
@@ -518,6 +531,11 @@ d3.selectAll("input[name='barTypeChartJs']").on("change", function() {
   }});
 
   plotChartJS(authorAvgRCount,"avrScore");
+
+   ////////////////////////////
+    //PLEASE ADD HERE FUNCTIONS THAT PLOT INITIAL CHARTS and any data retrival you need you can get here from variable data
+    // \/\/\/\/\/\/
+    ///////////////
 
       
 
@@ -535,7 +553,6 @@ d3.selectAll("input[name='barTypeChartJs']").on("change", function() {
     // \/\/\/\/\/\/
     ///////////////
   }
-
 
 });
 
