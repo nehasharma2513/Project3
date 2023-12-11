@@ -1,8 +1,8 @@
 // Available routes:
 // let booksURL = '/api/v1.0/books'
-// let usersURL = /api/v1.0/users
-// let reviewsURL = /api/v1.0/reviews 
-// let reviewsURL = /api/v1.0/merged
+// let usersURL = '/api/v1.0/users'
+// let reviewsURL = '/api/v1.0/reviews' 
+// let reviewsURL = '/api/v1.0/merged'
 
 //Part 1: Route Definitions and Constants
 
@@ -349,14 +349,18 @@ let merged = '/api/v1.0/merged';
 
 // Load the data using D3
 d3.json(merged).then(function(data){ 
-  // Extract relevant data and initialize default values
-  let maxReviewCounts = Math.max(...data.map(item => item.Ratings.length));
-  let yearOfPublicationList = data.map(item => item['Year-Of-Publication']);
-  let maxOverallYear = Math.max(...yearOfPublicationList);
-  let minOverallYear = Math.min(...yearOfPublicationList);
-  let authorsList = [...new Set(data.map(item => item['Book-Author']))].sort();
-  let author = data.filter(book => book.Ratings.length === maxReviewCounts)[0]['Book-Author'];
+  //Find the maximum number of reviews book recieved in the whole db
+  let maxReviewCounts=Math.max(...data.map(item=>item.Ratings.length));
+  // find the max and min Year of Publications within the whole db, so that
+  // size of the bubble within quadrant represent the year of book's publication
+  let yearOfPublicationList=data.map(item => item['Year-Of-Publication']);
+  let maxOverallYear=Math.max(...yearOfPublicationList);
+  let minOverallYear=Math.min(...yearOfPublicationList);
 
+  // add a dropdown menu
+  // find authors and sort them
+  let authors_list=[...new Set(data.map(item => item['Book-Author']))];
+  authors_list=authors_list.sort();
   console.log(maxOverallYear)
   console.log(minOverallYear)
   
@@ -479,35 +483,32 @@ console.log("Leaflet map initialized");
  // render initial Quadrant plots
   plotDefaultWithinQuadrantPart(author)
 
-     // Function to update the Leaflet map based on the selected author
+ // Function to update the Leaflet map based on the selected author
 function updateMap(author) {
   // Clear existing markers on the map
   clearMap();
 
-// Function to clear markers from the map
-function clearMap() {
-  myMap.eachLayer(layer => {
-    if (layer instanceof L.Marker) {
-      layer.remove();
-    }
-  });
-}
-      
-
-// Function called when a dropdown menu item is selected
-  function optionChanged(new_author){
-    //make 'bubbleChart' as default radio button selection 
-    let radioButtonThatCorrespondsToBubble = d3.select("input[name='chart'][value='bubbleChart']");
-    radioButtonThatCorrespondsToBubble.property("checked", true);
-    
-    // Render quadrant plots after the change of dropdown item
-    plotDefaultWithinQuadrantPart(new_author)
-
+  // Function to clear markers from the map
+  function clearMap() {
+    myMap.eachLayer(layer => {
+      if (layer instanceof L.Marker) {
+        layer.remove();
+      }
+    });
   }
+}
 
+// This function is called when a dropdown menu item is selected
+function optionChanged(new_author){
+  //make 'bubbleChart' as default radio button selection 
+  let radioButtonThatCorrespondsToBubble = d3.select("input[name='chart'][value='bubbleChart']");
+  radioButtonThatCorrespondsToBubble.property("checked", true);
+  
+  // render quadrant plots after the change of dropdown item
+  plotDefaultWithinQuadrantPart(new_author);
+}
 
-};
-
+});
 
 
 
