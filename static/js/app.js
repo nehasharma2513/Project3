@@ -58,8 +58,8 @@ function normilizedSizeList(valuesList,maxS,minS){
   // and then having max and min for the whole set convert any value within the range into [0;1]: projected01=(value-min)/(max-min)
   // then convert projected01 into value within range [minAcceptable;maxAcceptable]: projected01*(maxAcceptable-minAcceptable)+minAcceptable
   // https://math.stackexchange.com/questions/914823/shift-numbers-into-a-different-range
-  let minAcceptable=3;
-  let maxAcceptable=55;
+  let minAcceptable=10;
+  let maxAcceptable=50;
   return valuesList.map(value=>(minAcceptable+(value-minS)*(maxAcceptable-minAcceptable)/(maxS-minS)));
 }
 
@@ -132,7 +132,14 @@ function groupQuadrants(listOfObj,maxReviewCounts){
 function plotBubble(listOfObjects,maxReviewCounts,author,overalMAxYear,overalMinYear){
   // plot the bubble chart
   let yearOfPublicationList=listOfObjects.map(item => item.YearOfPublication);
-  let yearOfPublicationListNormilized=normilizedSizeList(yearOfPublicationList,overalMAxYear,overalMinYear);
+  // in this version size of the bubble will represent the year of book's publication, based on max and min year of publication for a selected author
+  let maxYear=Math.max(...yearOfPublicationList);
+  let minYear=Math.min(...yearOfPublicationList);
+  let yearOfPublicationListNormilized=normilizedSizeList(yearOfPublicationList,maxYear,minYear);
+  // there could be an option to normilize list of years based on min amd max year for the whole data set
+  // in that case you would rather use overalMAxYear and overalMinYear, e.g.
+  // let yearOfPublicationListNormilized=normilizedSizeList(yearOfPublicationList,overalMAxYear,overalMinYear);
+
   // x-axis will represent the count of reviews
   let reviewsCount=listOfObjects.map(item => item.reviewsCount);
   // y-axis will represent the average rating score
@@ -533,10 +540,10 @@ d3.selectAll("input[name='barTypeChartJs']").on("change", function() {
   plotChartJS(authorAvgRCount,"avrScore");
 
     ////////////////////////////
-    //PLEASE ADD HERE FUNCTIONS THAT PLOT INITIAL CHARTS and any data retrival you need you can get here from variable data
+    //PLEASE ADD HERE FUNCTIONS THAT PLOT INITIAL CHARTS and any data retrival you need you can get here from the variable, which is data, e.g. data.map... or data.forEach....
     // \/\/\/\/\/\/
     ///////////////
-    
+
 
 // This function is called when a dropdown menu item is selected
   function optionChanged(new_author){
