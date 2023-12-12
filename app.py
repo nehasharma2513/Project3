@@ -51,5 +51,6 @@ def get_reviews():
      reviews_data = [reviews for reviews in reviews_data_cursor]
      return jsonify(reviews_data)
 
-if __name__== "__main__":
-    app.run(debug=True)
+
+if __name__=='__main__':
+     app.run(debug=True)
