@@ -6,39 +6,54 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Book Review Insights</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
-  <link rel="stylesheet" href="../static/css/style.css"/>  
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="../static/css/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
- </head>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- Marker cluster JavaScript code -->
+  <script type="text/javascript" src="https://unpkg.com/leaflet.markercluster@1.0.3/dist/leaflet.markercluster.js"></script>
+  <!-- Marker cluster CSS -->
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet.markercluster@1.0.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet.markercluster@1.0.3/dist/MarkerCluster.Default.css">
+</head>
 <body>
 
-<div class="container">
-  <div class="row">
-    <div class="col-md-12 jumbotron text-center">
-      <h1>Book Review Insights Dashboard</h1>
-      <p> Some Instruction on what to do here on the page and why</p>
-    </div>
-  </div>
+  <div class="container">
     <div class="row">
-      <div class="col-md-2">
-          <div class="names-bar">
-            <h5>Author:</h5>
-            <select id="selDataset"></select>
-          </div>
-      </div>
-      <div class="col-md-12">
-        <!-- <p class="centeredText"><b>Review vs Average Rating Score patterns</b></p> -->
-        <div id="radio-buttons" class="centeredText">
-          <input type="radio" name="chart" value="bubbleChart" checked> Preview Quadrant Details
-          <input type="radio" name="chart" value="doughnutChart"> High Level Distribution
-       </div>
-        <div id="doughnutBubbleChart"></div>
+      <div class="col-md-12 jumbotron text-center">
+        <h2>Book Review Insights</h2>
+        <p> Interactive Analytics of Author's Book Review and Ratings</p>
       </div>
     </div>
+      <div class="row">
+        <div>
+          <div id="radio-buttons" class="centeredText">
+            <input type="radio" name="barTypeChartJs"  value="avgScore" checked> Average Rating Score
+            <input type="radio" name="barTypeChartJs"  value="ReviewsCount">  Reviews Count
+         </div>
+         <div>
+          <canvas id="chartJsChart"></canvas>
+        </div>
+        <div class="col-md-2">
+            <div class="names-bar">
+              <h5>Author:</h5>
+              <select id="selDataset"></select>
+            </div>
+        </div>
+        <div class="col-md-12">
+          <div id="radio-buttons" class="centeredText">
+            <input type="radio" name="chart" value="bubbleChart" checked> Preview Quadrant Details
+            <input type="radio" name="chart" value="doughnutChart"> High Level Distribution
+         </div>
+          <div id="doughnutBubbleChart"></div>
+          <div id="map" style="height: 500px;"></div>
+        </div>
+      </div>
+    </div>
+    
   </div>
-  
-</div>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.7/d3.layout.cloud.min.js"></script>
@@ -47,3 +62,4 @@
 
 </body>
 </html>
+
