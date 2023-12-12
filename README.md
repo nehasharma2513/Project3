@@ -15,8 +15,8 @@ The project can be run using following steps:
 
 
 ### References
-[Flask and mongodb] (https://www.digitalocean.com/community/tutorials/how-to-use-mongodb-in-a-flask-application)
-[Installation of charts js] (https://www.chartjs.org/docs/latest/getting-started/installation.html)
+[Flask and mongodb](https://www.digitalocean.com/community/tutorials/how-to-use-mongodb-in-a-flask-application)
+[Installation of charts js](https://www.chartjs.org/docs/latest/getting-started/installation.html)
 [chartsjs intro](https://www.chartjs.org/docs/latest/getting-started/usage.html)
 [Redraw chart in charts js](https://stackoverflow.com/questions/40056555/destroy-chart-js-bar-graph-to-redraw-other-graph-in-same-canvas)
 [Merge of collections](https://www.mongodb.com/developer/languages/python/python-quickstart-aggregation/)
