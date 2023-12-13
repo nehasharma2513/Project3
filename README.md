@@ -22,8 +22,8 @@ Our analysis focused on books' authors, specifically:
 Visualization shows bar charts showing top ten most popular authors, the number of reviews and their average ratings. We also show the details of their books, year of publication and books by each author in the order of their popularity.
 
 ### References
-[Flask and mongodb] (https://www.digitalocean.com/community/tutorials/how-to-use-mongodb-in-a-flask-application)
-[Installation of charts js] (https://www.chartjs.org/docs/latest/getting-started/installation.html)
+[Flask and mongodb](https://www.digitalocean.com/community/tutorials/how-to-use-mongodb-in-a-flask-application)
+[Installation of charts js](https://www.chartjs.org/docs/latest/getting-started/installation.html)
 [chartsjs intro](https://www.chartjs.org/docs/latest/getting-started/usage.html)
 [Redraw chart in charts js](https://stackoverflow.com/questions/40056555/destroy-chart-js-bar-graph-to-redraw-other-graph-in-same-canvas)
 [Merge of collections](https://www.mongodb.com/developer/languages/python/python-quickstart-aggregation/)
