@@ -1,8 +1,28 @@
-h1 {
+h3 {
     font-weight: 200;
     font-family: Arial, Helvetica, sans-serif
 }
 
+#doughnutBubbleChart {
+    margin: 0 auto;
+  }
+
+.custom-col-12 {
+    padding-top: 30px; 
+}
+
+.jumbotron{
+    height: 120px;
+    padding-top: 2px; 
+    padding-bottom: 2px; 
+    margin-bottom: 30px; 
+}
+
+.centeredText{
+    text-align: center;
+}
+
 #chartJsChart {
     width:600;
-}
+    height: 250px; 
+} 
